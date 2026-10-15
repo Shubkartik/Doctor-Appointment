@@ -1,0 +1,3 @@
+@echo off
+echo Starting MediBook with WebSocket support...
+daphne -b 127.0.0.1 -p 8000 doctor_appointment.asgi:application
