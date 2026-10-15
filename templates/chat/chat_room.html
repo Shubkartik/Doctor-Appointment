@@ -123,13 +123,10 @@ html, body {
 </style>
 
 <script>
-// WebSocket connection setup dynamically handling http/https and correct path
+// WebSocket connection setup
 var roomId = "{{ room.id }}";
 var userId = "{{ request.user.id }}";
-
-// Dynamically use wss:// for https and ws:// for http
-var wsScheme = window.location.protocol === "https:" ? "wss://" : "ws://";
-var socket = new WebSocket(wsScheme + window.location.host + '/ws/chat/room/' + roomId + '/');
+var socket = new WebSocket('ws://127.0.0.1:8000/ws/chat/' + roomId + '/');
 
 var box = document.getElementById('chatBox');
 
@@ -180,7 +177,7 @@ socket.onmessage = function(e) {
 document.getElementById('btnSend').onclick = function() {
     var input = document.getElementById('msgInput');
     var msg = input.value.trim();
-    if (msg && socket.readyState === WebSocket.OPEN) {  // Check if WebSocket is open
+    if (msg && socket.readyState === 1) {  // Check if WebSocket is open
         socket.send(JSON.stringify({message: msg}));
         input.value = '';  // Clear input
         input.focus();  // Keep focus on input
@@ -199,3 +196,4 @@ document.getElementById('msgInput').onkeypress = function(e) {
 box.scrollTop = box.scrollHeight;
 document.getElementById('msgInput').focus();
 </script>
+{% endblock %}
