@@ -123,34 +123,33 @@ html, body {
 </style>
 
 <script>
-// WebSocket connection setup
+// WebSocket connection setup matching your routing.py pattern
 var roomId = "{{ room.id }}";
 var userId = "{{ request.user.id }}";
-var socket = new WebSocket('ws://127.0.0.1:8000/ws/chat/' + roomId + '/');
+
+var wsScheme = window.location.protocol === "https:" ? "wss://" : "ws://";
+var socket = new WebSocket(wsScheme + window.location.host + '/ws/chat/' + roomId + '/');
 
 var box = document.getElementById('chatBox');
 
 // Handle incoming messages
 socket.onmessage = function(e) {
     var data = JSON.parse(e.data);
-    if (data.type !== 'message') return;  // Only handle message type
+    if (data.type !== 'message') return;
     
     var isMe = (String(data.sender_id) === String(userId));
     
-    // Create message container
     var div = document.createElement('div');
     div.style.display = 'flex';
     div.style.marginBottom = '12px';
-    div.style.justifyContent = isMe ? 'flex-end' : 'flex-start';  // Right for sent, left for received
-    div.style.animation = 'fadeInUp 0.2s ease';  // Entrance animation
+    div.style.justifyContent = isMe ? 'flex-end' : 'flex-start';
+    div.style.animation = 'fadeInUp 0.2s ease';
     
-    // Create message bubble
     var bubble = document.createElement('div');
     bubble.style.maxWidth = '70%';
     bubble.style.padding = '10px 14px';
     bubble.style.wordWrap = 'break-word';
     
-    // Style based on sender
     if (isMe) {
         bubble.style.borderRadius = '12px 12px 0 12px';
         bubble.style.background = 'linear-gradient(135deg, var(--primary-color), var(--primary-dark))';
@@ -161,39 +160,35 @@ socket.onmessage = function(e) {
         bubble.style.color = 'var(--text-primary)';
     }
     
-    // Add message content and timestamp
     bubble.innerHTML = '<p style="margin:0;font-size:0.95rem;">' + data.message + '</p><small style="opacity:0.7;display:block;margin-top:3px;font-size:0.65rem;">' + data.timestamp + '</small>';
     div.appendChild(bubble);
     box.appendChild(div);
     
-    // Auto-scroll to bottom
     box.scrollTo({
         top: box.scrollHeight,
         behavior: 'smooth'
     });
 };
 
-// Send message on button click
 document.getElementById('btnSend').onclick = function() {
     var input = document.getElementById('msgInput');
     var msg = input.value.trim();
-    if (msg && socket.readyState === 1) {  // Check if WebSocket is open
+    if (msg && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({message: msg}));
-        input.value = '';  // Clear input
-        input.focus();  // Keep focus on input
+        input.value = '';
+        input.focus();
     }
 };
 
-// Send message on Enter key
 document.getElementById('msgInput').onkeypress = function(e) {
     if (e.key === 'Enter') {
-        e.preventDefault();  // Prevent form submission
+        e.preventDefault();
         document.getElementById('btnSend').click();
     }
 };
 
-// Scroll to bottom on load and focus input
 box.scrollTop = box.scrollHeight;
 document.getElementById('msgInput').focus();
 </script>
-{% endblock %}
+
+{% endblock %} <!-- Make sure this closing tag is present at the very end! -->
